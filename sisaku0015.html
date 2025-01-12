@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3カラムレイアウト</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 左カラム */
+        .sidebar-left {
+            width: 20%;
+            background-color: #f0f0f0;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .accordion {
+            border: 2px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            background-color: #e6e6e6;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: -10px;
+            background-color: #ffffff;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        /* 中央カラム */
+        .main-content {
+            width: 60%;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-top: 15px;
+        }
+
+        /* 右カラム */
+        .sidebar-right {
+            width: 20%;
+            background-color: #e6e6e6;
+            padding: 20px;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        /* 目次のリスト */
+        .toc {
+            list-style: none;
+            padding: 0;
+        }
+
+        .toc li {
+            margin: 10px 0;
+        }
+
+        .toc .sub-list {
+            margin-left: 20px;
+            list-style: circle;
+        }
+
+        .toc .current {
+            background-color: #dcdcdc;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        /* 枠スタイル */
+        .dotted-box {
+            border: 2px dotted #333;
+            padding: 10px;
+            margin: 20px 0;
+        }
+
+        .double-box {
+            border: 3px double #333;
+            padding: 10px;
+            margin: 20px 0;
+        }
+
+        .solid-box {
+            border: 2px solid #333;
+            padding: 10px;
+            margin: 20px 0;
+        }
+
+        .formula-box {
+            margin-top: 10px;
+        }
+
+        .formula-box label {
+            font-weight: bold;
+        }
+
+        .formula-box input[type="number"] {
+            width: 50px;
+            margin: 0 5px;
+            padding: 5px;
+        }
+
+        .result-box {
+            display: inline-block;
+            width: 60px;
+            text-align: center;
+            font-weight: bold;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin-left: 5px;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const accordions = document.querySelectorAll('.accordion');
+            accordions.forEach(accordion => {
+                accordion.addEventListener('click', function() {
+                    const content = this.nextElementSibling;
+                    if (content.style.display === 'block') {
+                        content.style.display = 'none';
+                    } else {
+                        content.style.display = 'block';
+                    }
+                });
+            });
+
+            // チェックボックスとテキストの連動
+            const boxCheckbox = document.getElementById('box');
+            const dpText = document.getElementById('dp-text');
+
+            boxCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    dpText.style.display = 'block';
+                } else {
+                    dpText.style.display = 'none';
+                }
+            });
+
+            // 目次と本文の連動
+            const tocLinks = document.querySelectorAll('.toc a');
+            const sections = document.querySelectorAll('.main-content h1, .main-content h2');
+
+            tocLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // 現在の位置の目次をハイライト
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        tocLinks.forEach(link => {
+                            link.parentElement.classList.remove('current');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.parentElement.classList.add('current');
+                            }
+                        });
+                    }
+                });
+            }, { threshold: 0.6 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            // 数式の計算
+            const inputBox = document.getElementById('input-box');
+            const resultBox = document.getElementById('result-box');
+
+            inputBox.addEventListener('input', function() {
+                const inputValue = parseFloat(inputBox.value) || 0;
+                const result = 70 - 70 * 0.1 * inputValue;
+                resultBox.textContent = result.toFixed(2);
+            });
+        });
+    </script>
+</head>
+<body>
+    <!-- 左カラム -->
+    <div class="sidebar-left">
+        <div class="accordion">特別処理 <span>＋</span></div>
+        <div class="accordion-content">
+            <p>KPCと会話する</p>
+        </div>
+
+        <div class="accordion">戦闘① <span>＋</span></div>
+        <div class="accordion-content">
+            <p>スライムが行く手を阻んでいる。</p>
+            <div class="formula-box">
+                <label>スライムの体力計算(1d6)：</label>
+                <span>70 - 70 × 0.1 ×</span>
+                <input type="number" id="input-box" placeholder="0" />
+                <span>=</span>
+                <div class="result-box" id="result-box">0.00</div>
+            </div>
+        </div>
+
+        <div class="accordion">アイテム処理 <span>＋</span></div>
+        <div class="accordion-content">
+            <div class="checkbox-item">
+                <input type="checkbox" id="box" />
+                <label for="box">箱</label>
+            </div>
+            <div class="checkbox-item" id="dp-text" style="display: none;">
+                <p>所持品のDPを+3する</p>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="sword" />
+                <label for="sword">剣</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="key" />
+                <label for="key">カギ</label>
+            </div>
+        </div>
+        <div class="accordion">うわあ！ <span>＋</span></div>
+        <div class="accordion-content">
+            <p>ああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ</p>
+        </div>
+    </div>
+
+    <!-- 中央カラム -->
+    <div class="main-content">
+        <!--第1話-->
+        <h1 id="chapter001">第1話</h1>
+        <h2 id="section0011">KPCと出会う</h2>
+        <p><strong>KPC：</strong>「よかったら、使って」</p>
+        <p>KPCが箱を渡す</p>
+        <p></p>
+        <div class="dotted-box">
+            <p>これは〇〇が入ったものであり、手にした人にはダメージポイントを+3する。<br/>これは点線の枠です。アイテムの詳細などを説明する際に便利です。<br/>チェックボックスの確認を忘れずに。</p>
+        </div>
+        <h2 id="section0012">チュートリアル</h2>
+        <div class="double-box">
+            <p>これは二重線の枠です。重要な情報を強調する際に使用します。</p>
+        </div>
+        <h3>戦闘①</h3>
+        <p>スライムが行く手を阻んでいる。</p>
+        <div class="solid-box">
+            <p>これは実線の枠です。一般的な情報を囲むのに適しています。</p>
+        </div>
+        <h2 id="section0013">NPCに報酬をもらう</h2>
+        <p>NPCがアイテムを手渡す。</p>
+
+        <!--第2話-->
+        <h1 id="chapter002">第2話</h1>
+        <h2 id="section0021">KPCと出会う</h2>
+        <p><strong>KPC：</strong>「よかったら、使って」</p>
+        <p>KPCが箱を渡す</p>
+        <p></p>
+        <div class="dotted-box">
+            <p>これは〇〇が入ったものであり、手にした人にはダメージポイントを+3する。<br/>これは点線の枠です。アイテムの詳細などを説明する際に便利です。<br/>チェックボックスの確認を忘れずに。</p>
+        </div>
+        <h2 id="section0022">チュートリアル</h2>
+        <div class="double-box">
+            <p>これは二重線の枠です。重要な情報を強調する際に使用します。</p>
+        </div>
+        <h3>戦闘①</h3>
+        <p>スライムが行く手を阻んでいる。</p>
+        <div class="solid-box">
+            <p>これは実線の枠です。一般的な情報を囲むのに適しています。</p>
+        </div>
+        <h2 id="section0023">NPCに報酬をもらう</h2>
+        <p>NPCがアイテムを手渡す。</p>
+        <p>ああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ</p>
+    </div>
+
+    <!-- 右カラム -->
+    <div class="sidebar-right">
+        <h2>目次</h2>
+        <ul class="toc">
+            <li><a href="#chapter001">第1話</a>
+                <ul class="sub-list">
+                    <li><a href="#section0011">KPCと出会う</a></li>
+                    <li><a href="#section0012">チュートリアル</a></li>
+                    <li><a href="#section0013">NPCに報酬をもらう</a></li>
+                </ul>
+            </li>
+            <li><a href="#chapter002">第2話</a>
+                <ul class="sub-list">
+                    <li><a href="#section0021">KPCと出会う</a></li>
+                    <li><a href="#section0022">チュートリアル</a></li>
+                    <li><a href="#section0023">NPCに報酬をもらう</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
